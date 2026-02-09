@@ -157,12 +157,12 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Hero background overlay styles */
+  /* Hero background overlay styles - transparent and vivid */
   .hero-bg-overlay {
     @apply absolute inset-0;
     background: linear-gradient(135deg, 
-      hsla(227, 74%, 56%, 0.85) 0%, 
-      hsla(282, 84%, 38%, 0.85) 100%
+      hsla(227, 74%, 56%, 0.35) 0%, 
+      hsla(282, 84%, 38%, 0.40) 100%
     );
   }
 

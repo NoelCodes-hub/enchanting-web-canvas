@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import { Bot, Trash2, Volume2, Download, Send } from 'lucide-react';
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const ChatSection = () => {
+  const { t } = useLanguage();
   const [message, setMessage] = useState('');
 
   return (
@@ -17,10 +19,10 @@ const ChatSection = () => {
           className="text-center mb-12"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground mb-4">
-            Chat with <span className="gradient-text">PLUSME Assistant</span>
+            {t('chat.title')} <span className="gradient-text">{t('chat.titleHighlight')}</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Ask questions about workplace accommodations and get personalized recommendations using Groq AI
+            {t('chat.subtitle')}
           </p>
         </motion.div>
 
@@ -38,7 +40,7 @@ const ChatSection = () => {
               <div className="flex items-center gap-3">
                 <Bot className="w-6 h-6 text-primary-foreground" />
                 <h3 className="text-lg font-semibold text-primary-foreground">
-                  PLUSME Assistant (Groq AI)
+                  {t('chat.assistantName')}
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -63,13 +65,11 @@ const ChatSection = () => {
                 <div className="flex-1">
                   <div className="bg-muted rounded-2xl rounded-tl-md p-4 max-w-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-foreground">PLUSME Assistant</span>
+                      <span className="text-sm font-semibold text-foreground">{t('chat.titleHighlight')}</span>
                       <span className="text-xs text-muted-foreground">10:00 AM</span>
                     </div>
                     <p className="text-sm text-foreground leading-relaxed">
-                      Hello! I'm PLUSME, powered by Groq's Llama 3.3 model. I can help you find 
-                      suitable tasks and accommodations based on job roles and specific disabilities 
-                      from our database. How can I assist you today?
+                      {t('chat.greeting')}
                     </p>
                     <div className="flex gap-2 mt-3">
                       <button className="w-7 h-7 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors">
@@ -85,11 +85,11 @@ const ChatSection = () => {
                 <div className="flex-1 flex justify-end">
                   <div className="gradient-bg rounded-2xl rounded-tr-md p-4 max-w-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-primary-foreground">You</span>
+                      <span className="text-sm font-semibold text-primary-foreground">{t('chat.you')}</span>
                       <span className="text-xs text-primary-foreground/70">10:02 AM</span>
                     </div>
                     <p className="text-sm text-primary-foreground leading-relaxed">
-                      I'm a software developer with visual impairment. What tasks would you recommend for me?
+                      {t('chat.userMessage')}
                     </p>
                   </div>
                 </div>
@@ -102,7 +102,7 @@ const ChatSection = () => {
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type your message here..."
+                  placeholder={t('chat.placeholder')}
                   rows={1}
                   className="flex-1 px-5 py-3 rounded-full border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none text-sm transition-all"
                 />

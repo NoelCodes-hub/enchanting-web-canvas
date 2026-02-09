@@ -2,8 +2,11 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, BookOpen } from 'lucide-react';
 import heroImage from '@/assets/hero-1.jpeg';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const HeroSection = () => {
+  const { t } = useLanguage();
+
   return (
     <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background Image */}
@@ -28,12 +31,12 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-extrabold text-primary-foreground leading-tight mb-6">
-              Empowering{' '}
-              <span className="text-accent">
-                Workplace Inclusion
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-extrabold text-primary-foreground leading-tight mb-6 drop-shadow-lg">
+              {t('hero.title1')}{' '}
+              <span className="text-accent drop-shadow-md">
+                {t('hero.title2')}
               </span>{' '}
-              Through AI
+              {t('hero.title3')}
             </h1>
           </motion.div>
 
@@ -41,11 +44,9 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg sm:text-xl text-primary-foreground/90 max-w-2xl mx-auto mb-10"
+            className="text-lg sm:text-xl text-primary-foreground/95 max-w-2xl mx-auto mb-10 drop-shadow-md"
           >
-            PLUSME uses advanced AI and comprehensive disability data to recommend 
-            suitable tasks and accommodations for people with disabilities in various 
-            job roles, creating more inclusive work environments.
+            {t('hero.description')}
           </motion.p>
 
           <motion.div
@@ -58,7 +59,7 @@ const HeroSection = () => {
               size="xl" 
               className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg font-bold"
             >
-              Start Chatting with PLUSME
+              {t('hero.cta1')}
               <ArrowRight className="w-5 h-5" />
             </Button>
             <Button 
@@ -66,7 +67,7 @@ const HeroSection = () => {
               variant="heroOutline"
             >
               <BookOpen className="w-5 h-5" />
-              Explore Resources
+              {t('hero.cta2')}
             </Button>
           </motion.div>
         </div>

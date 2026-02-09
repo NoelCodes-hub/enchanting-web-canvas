@@ -1,31 +1,34 @@
 import { motion } from 'framer-motion';
 import { Bot, Database, MessageSquare, Languages } from 'lucide-react';
 import heroImage2 from '@/assets/hero-2.jpeg';
-
-const features = [
-  {
-    icon: Bot,
-    title: 'AI-Powered Recommendations',
-    description: 'Get personalized task recommendations based on job role and specific disability needs using Groq, DeepSeek, and OpenAI models',
-  },
-  {
-    icon: Database,
-    title: 'Comprehensive Disability Database',
-    description: 'Access tasks recommendations for disability types with detailed accommodation strategies and task suitability analysis',
-  },
-  {
-    icon: MessageSquare,
-    title: 'Interactive Chat Assistant',
-    description: 'Chat with our AI to get instant answers to your workplace accommodation questions with text-to-speech functionality',
-  },
-  {
-    icon: Languages,
-    title: 'Multi-Language Support',
-    description: 'Use the app in English, French, Portuguese, Chinese, and Ndebele with seamless translation',
-  },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const FeaturesSection = () => {
+  const { t } = useLanguage();
+
+  const features = [
+    {
+      icon: Bot,
+      title: t('features.ai.title'),
+      description: t('features.ai.desc'),
+    },
+    {
+      icon: Database,
+      title: t('features.database.title'),
+      description: t('features.database.desc'),
+    },
+    {
+      icon: MessageSquare,
+      title: t('features.chat.title'),
+      description: t('features.chat.desc'),
+    },
+    {
+      icon: Languages,
+      title: t('features.language.title'),
+      description: t('features.language.desc'),
+    },
+  ];
+
   return (
     <section id="features" className="relative section-padding overflow-hidden">
       {/* Background Image */}
@@ -48,10 +51,10 @@ const FeaturesSection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-primary-foreground mb-4">
-            How PLUSME Helps
+            {t('features.title')}
           </h2>
           <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto">
-            Our AI-powered platform provides comprehensive support for creating inclusive workplaces
+            {t('features.subtitle')}
           </p>
         </motion.div>
 
