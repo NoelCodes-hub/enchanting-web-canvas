@@ -2,31 +2,34 @@ import { motion } from 'framer-motion';
 import { ClipboardList, BarChart3, FileText, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import heroImage3 from '@/assets/hero-3.jpeg';
-
-const tools = [
-  {
-    icon: ClipboardList,
-    title: 'Accommodation Assessment',
-    description: 'Evaluate workplace needs and get personalized accommodation recommendations based on disability type.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Inclusion Metrics',
-    description: 'Track and measure inclusion efforts with our comprehensive metrics dashboard.',
-  },
-  {
-    icon: FileText,
-    title: 'Policy Templates',
-    description: 'Access ready-to-use templates for inclusive workplace policies and procedures.',
-  },
-  {
-    icon: CalendarDays,
-    title: 'Training Scheduler',
-    description: 'Plan and schedule disability awareness training for your team.',
-  },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const ToolsSection = () => {
+  const { t } = useLanguage();
+
+  const tools = [
+    {
+      icon: ClipboardList,
+      title: t('tools.assessment.title'),
+      description: t('tools.assessment.desc'),
+    },
+    {
+      icon: BarChart3,
+      title: t('tools.metrics.title'),
+      description: t('tools.metrics.desc'),
+    },
+    {
+      icon: FileText,
+      title: t('tools.templates.title'),
+      description: t('tools.templates.desc'),
+    },
+    {
+      icon: CalendarDays,
+      title: t('tools.training.title'),
+      description: t('tools.training.desc'),
+    },
+  ];
+
   return (
     <section id="tools" className="relative section-padding overflow-hidden">
       {/* Background Image */}
@@ -49,10 +52,10 @@ const ToolsSection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-primary-foreground mb-4">
-            Tools & Resources
+            {t('tools.title')}
           </h2>
           <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto">
-            Practical tools to support workplace inclusion
+            {t('tools.subtitle')}
           </p>
         </motion.div>
 
@@ -81,7 +84,7 @@ const ToolsSection = () => {
                 </p>
 
                 <Button size="sm" className="w-full">
-                  Use Tool
+                  {t('tools.useTool')}
                 </Button>
               </div>
             </motion.div>

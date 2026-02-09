@@ -1,64 +1,66 @@
 import { motion } from 'framer-motion';
 import { Search, Eye, Ear, Accessibility, Brain, Sparkles, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
-
-const categories = [
-  { id: 'all', label: 'All Disabilities' },
-  { id: 'visual', label: 'Visual Impairment', icon: Eye },
-  { id: 'hearing', label: 'Hearing Impairment', icon: Ear },
-  { id: 'mobility', label: 'Mobility Disabilities', icon: Accessibility },
-  { id: 'cognitive', label: 'Cognitive', icon: Brain },
-  { id: 'neurodiversity', label: 'Neurodiversity', icon: Sparkles },
-];
-
-const articles = [
-  {
-    id: 1,
-    title: 'Visual Impairment Accommodations',
-    description: 'Screen readers, magnification software, and workplace adaptations for visually impaired employees.',
-    category: 'visual',
-    icon: Eye,
-  },
-  {
-    id: 2,
-    title: 'Hearing Accessibility Solutions',
-    description: 'Sign language interpreters, captioning services, and visual alert systems for deaf and hard of hearing workers.',
-    category: 'hearing',
-    icon: Ear,
-  },
-  {
-    id: 3,
-    title: 'Mobility Support Strategies',
-    description: 'Wheelchair accessibility, ergonomic workstations, and flexible work arrangements for mobility disabilities.',
-    category: 'mobility',
-    icon: Accessibility,
-  },
-  {
-    id: 4,
-    title: 'Cognitive Disability Support',
-    description: 'Task simplification, memory aids, and structured routines for employees with cognitive challenges.',
-    category: 'cognitive',
-    icon: Brain,
-  },
-  {
-    id: 5,
-    title: 'Neurodiversity in the Workplace',
-    description: 'Autism-friendly environments, ADHD accommodations, and sensory considerations for neurodiverse individuals.',
-    category: 'neurodiversity',
-    icon: Sparkles,
-  },
-  {
-    id: 6,
-    title: 'Universal Design Principles',
-    description: 'Creating inclusive workspaces that benefit all employees regardless of ability or disability.',
-    category: 'all',
-    icon: Accessibility,
-  },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const KnowledgeBaseSection = () => {
+  const { t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const categories = [
+    { id: 'all', label: t('knowledge.all') },
+    { id: 'visual', label: t('knowledge.visual'), icon: Eye },
+    { id: 'hearing', label: t('knowledge.hearing'), icon: Ear },
+    { id: 'mobility', label: t('knowledge.mobility'), icon: Accessibility },
+    { id: 'cognitive', label: t('knowledge.cognitive'), icon: Brain },
+    { id: 'neurodiversity', label: t('knowledge.neurodiversity'), icon: Sparkles },
+  ];
+
+  const articles = [
+    {
+      id: 1,
+      title: t('knowledge.article1.title'),
+      description: t('knowledge.article1.desc'),
+      category: 'visual',
+      icon: Eye,
+    },
+    {
+      id: 2,
+      title: t('knowledge.article2.title'),
+      description: t('knowledge.article2.desc'),
+      category: 'hearing',
+      icon: Ear,
+    },
+    {
+      id: 3,
+      title: t('knowledge.article3.title'),
+      description: t('knowledge.article3.desc'),
+      category: 'mobility',
+      icon: Accessibility,
+    },
+    {
+      id: 4,
+      title: t('knowledge.article4.title'),
+      description: t('knowledge.article4.desc'),
+      category: 'cognitive',
+      icon: Brain,
+    },
+    {
+      id: 5,
+      title: t('knowledge.article5.title'),
+      description: t('knowledge.article5.desc'),
+      category: 'neurodiversity',
+      icon: Sparkles,
+    },
+    {
+      id: 6,
+      title: t('knowledge.article6.title'),
+      description: t('knowledge.article6.desc'),
+      category: 'all',
+      icon: Accessibility,
+    },
+  ];
 
   const filteredArticles = articles.filter((article) => {
     const matchesCategory = activeCategory === 'all' || article.category === activeCategory;
@@ -79,10 +81,10 @@ const KnowledgeBaseSection = () => {
           className="text-center mb-12"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-card-foreground mb-4">
-            Disability <span className="gradient-text">Knowledge Base</span>
+            {t('knowledge.title')} <span className="gradient-text">{t('knowledge.titleHighlight')}</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Search through various disability types with detailed recommendations and accommodations
+            {t('knowledge.subtitle')}
           </p>
         </motion.div>
 
@@ -98,7 +100,7 @@ const KnowledgeBaseSection = () => {
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search disabilities (e.g., visual impairment, autism, mobility...)"
+              placeholder={t('knowledge.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-14 pr-6 py-4 rounded-full border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
@@ -158,7 +160,7 @@ const KnowledgeBaseSection = () => {
                   href="#"
                   className="inline-flex items-center gap-2 text-primary font-semibold text-sm hover:gap-3 transition-all"
                 >
-                  Read More
+                  {t('knowledge.readMore')}
                   <ArrowRight className="w-4 h-4" />
                 </a>
               </div>

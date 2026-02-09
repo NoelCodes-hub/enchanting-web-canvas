@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Globe, ChevronDown, Bot, HandHeart } from 'lucide-react';
-
-const navLinks = [
-  { label: 'Home', href: '#home' },
-  { label: 'Features', href: '#features' },
-  { label: 'Knowledge Base', href: '#knowledge' },
-  { label: 'Chat', href: '#chat' },
-  { label: 'Tools', href: '#tools' },
-];
+import { Menu, X, Globe, ChevronDown, Bot, HandHeart, Check } from 'lucide-react';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const { language, setLanguage, t, languageNames } = useLanguage();
+
+  const navLinks = [
+    { label: t('nav.home'), href: '#home' },
+    { label: t('nav.features'), href: '#features' },
+    { label: t('nav.knowledge'), href: '#knowledge' },
+    { label: t('nav.chat'), href: '#chat' },
+    { label: t('nav.tools'), href: '#tools' },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +25,23 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.lang-dropdown')) {
+        setIsLangDropdownOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const handleLanguageChange = (lang: Language) => {
+    setLanguage(lang);
+    setIsLangDropdownOpen(false);
+  };
 
   return (
     <motion.header
@@ -45,7 +65,7 @@ const Header = () => {
                 PLUSME
               </span>
               <span className="text-xs text-muted-foreground -mt-1">
-                AI Workplace Assistant
+                {t('header.tagline')}
               </span>
             </div>
           </a>
@@ -66,10 +86,43 @@ const Header = () => {
 
           {/* Actions */}
           <div className="hidden lg:flex items-center gap-3">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 cursor-pointer transition-colors">
-              <Globe className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">English</span>
-              <ChevronDown className="w-3 h-3" />
+            {/* Language Dropdown */}
+            <div className="relative lang-dropdown">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLangDropdownOpen(!isLangDropdownOpen);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 cursor-pointer transition-colors"
+              >
+                <Globe className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">{languageNames[language]}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              <AnimatePresence>
+                {isLangDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full right-0 mt-2 w-40 bg-card border border-border rounded-xl shadow-lg overflow-hidden z-50"
+                  >
+                    {(Object.keys(languageNames) as Language[]).map((lang) => (
+                      <button
+                        key={lang}
+                        onClick={() => handleLanguageChange(lang)}
+                        className="w-full flex items-center justify-between px-4 py-3 text-sm hover:bg-muted transition-colors"
+                      >
+                        <span className={language === lang ? 'font-semibold text-primary' : 'text-foreground'}>
+                          {languageNames[lang]}
+                        </span>
+                        {language === lang && <Check className="w-4 h-4 text-primary" />}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 cursor-pointer transition-colors">
@@ -79,10 +132,10 @@ const Header = () => {
             </div>
 
             <Button variant="outline" size="sm">
-              Log In
+              {t('header.login')}
             </Button>
             <Button size="sm">
-              Sign Up
+              {t('header.signup')}
             </Button>
           </div>
 
@@ -115,9 +168,33 @@ const Header = () => {
                     {link.label}
                   </a>
                 ))}
+                
+                {/* Mobile Language Selector */}
+                <div className="px-4 py-2">
+                  <p className="text-xs text-muted-foreground mb-2">Language</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(Object.keys(languageNames) as Language[]).map((lang) => (
+                      <button
+                        key={lang}
+                        onClick={() => {
+                          handleLanguageChange(lang);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                          language === lang
+                            ? 'gradient-bg text-primary-foreground'
+                            : 'bg-muted text-foreground hover:bg-muted/80'
+                        }`}
+                      >
+                        {languageNames[lang]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
                 <div className="flex gap-2 mt-4 px-4">
-                  <Button variant="outline" className="flex-1">Log In</Button>
-                  <Button className="flex-1">Sign Up</Button>
+                  <Button variant="outline" className="flex-1">{t('header.login')}</Button>
+                  <Button className="flex-1">{t('header.signup')}</Button>
                 </div>
               </nav>
             </motion.div>
