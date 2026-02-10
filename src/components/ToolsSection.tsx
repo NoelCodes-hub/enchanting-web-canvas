@@ -3,15 +3,18 @@ import { ClipboardList, BarChart3, FileText, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import heroImage3 from '@/assets/hero-3.jpeg';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 
 const ToolsSection = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const tools = [
     {
       icon: ClipboardList,
       title: t('tools.assessment.title'),
       description: t('tools.assessment.desc'),
+      link: '/assessment',
     },
     {
       icon: BarChart3,
@@ -83,7 +86,7 @@ const ToolsSection = () => {
                   {tool.description}
                 </p>
 
-                <Button size="sm" className="w-full">
+                <Button size="sm" className="w-full" onClick={() => tool.link ? navigate(tool.link) : undefined}>
                   {t('tools.useTool')}
                 </Button>
               </div>
