@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Globe, ChevronDown, Bot, HandHeart, Check } from 'lucide-react';
+import { Menu, X, Globe, ChevronDown, Bot, HandHeart, Check, LogOut, User } from 'lucide-react';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const { language, setLanguage, t, languageNames } = useLanguage();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const navLinks = [
     { label: t('nav.home'), href: '#home' },
@@ -19,20 +23,15 @@ const Header = () => {
   ];
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest('.lang-dropdown')) {
-        setIsLangDropdownOpen(false);
-      }
+      if (!target.closest('.lang-dropdown')) setIsLangDropdownOpen(false);
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
@@ -48,29 +47,21 @@ const Header = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'glass-effect py-3 shadow-md' 
-          : 'bg-transparent py-4'
+        isScrolled ? 'glass-effect py-3 shadow-md' : 'bg-transparent py-4'
       }`}
     >
       <div className="container-custom">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <a href="#home" className="flex items-center gap-3 group">
             <div className="w-11 h-11 rounded-xl gradient-bg flex items-center justify-center shadow-glow transition-transform group-hover:scale-110">
               <HandHeart className="w-6 h-6 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-display font-extrabold gradient-text">
-                PLUSME
-              </span>
-              <span className="text-xs text-muted-foreground -mt-1">
-                {t('header.tagline')}
-              </span>
+              <span className="text-2xl font-display font-extrabold gradient-text">PLUSME</span>
+              <span className="text-xs text-muted-foreground -mt-1">{t('header.tagline')}</span>
             </div>
           </a>
 
-          {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
               <a
@@ -84,22 +75,18 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Actions */}
           <div className="hidden lg:flex items-center gap-3">
             {/* Language Dropdown */}
             <div className="relative lang-dropdown">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsLangDropdownOpen(!isLangDropdownOpen);
-                }}
+                onClick={(e) => { e.stopPropagation(); setIsLangDropdownOpen(!isLangDropdownOpen); }}
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 cursor-pointer transition-colors"
               >
                 <Globe className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">{languageNames[language]}</span>
                 <ChevronDown className={`w-3 h-3 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
-              
+
               <AnimatePresence>
                 {isLangDropdownOpen && (
                   <motion.div
@@ -124,22 +111,30 @@ const Header = () => {
                 )}
               </AnimatePresence>
             </div>
-            
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 cursor-pointer transition-colors">
-              <Bot className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Groq</span>
-              <ChevronDown className="w-3 h-3" />
-            </div>
 
-            <Button variant="outline" size="sm">
-              {t('header.login')}
-            </Button>
-            <Button size="sm">
-              {t('header.signup')}
-            </Button>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted">
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium truncate max-w-[120px]">{user.email}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={signOut}>
+                  <LogOut className="w-4 h-4 mr-1" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" onClick={() => navigate('/auth')}>
+                  {t('header.login')}
+                </Button>
+                <Button size="sm" onClick={() => navigate('/auth')}>
+                  {t('header.signup')}
+                </Button>
+              </>
+            )}
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
@@ -148,7 +143,6 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -168,18 +162,14 @@ const Header = () => {
                     {link.label}
                   </a>
                 ))}
-                
-                {/* Mobile Language Selector */}
+
                 <div className="px-4 py-2">
                   <p className="text-xs text-muted-foreground mb-2">Language</p>
                   <div className="flex flex-wrap gap-2">
                     {(Object.keys(languageNames) as Language[]).map((lang) => (
                       <button
                         key={lang}
-                        onClick={() => {
-                          handleLanguageChange(lang);
-                          setIsMobileMenuOpen(false);
-                        }}
+                        onClick={() => { handleLanguageChange(lang); setIsMobileMenuOpen(false); }}
                         className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                           language === lang
                             ? 'gradient-bg text-primary-foreground'
@@ -191,10 +181,22 @@ const Header = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2 mt-4 px-4">
-                  <Button variant="outline" className="flex-1">{t('header.login')}</Button>
-                  <Button className="flex-1">{t('header.signup')}</Button>
+                  {user ? (
+                    <Button variant="outline" className="flex-1" onClick={signOut}>
+                      <LogOut className="w-4 h-4 mr-1" /> Logout
+                    </Button>
+                  ) : (
+                    <>
+                      <Button variant="outline" className="flex-1" onClick={() => { navigate('/auth'); setIsMobileMenuOpen(false); }}>
+                        {t('header.login')}
+                      </Button>
+                      <Button className="flex-1" onClick={() => { navigate('/auth'); setIsMobileMenuOpen(false); }}>
+                        {t('header.signup')}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </nav>
             </motion.div>

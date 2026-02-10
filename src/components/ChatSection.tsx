@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { Bot, Trash2, Volume2, Download, Send, Loader2 } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { Bot, Trash2, Send, Loader2, Volume2, Square } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -34,10 +34,7 @@ async function streamChat({
     return;
   }
 
-  if (!resp.body) {
-    onError('No response body');
-    return;
-  }
+  if (!resp.body) { onError('No response body'); return; }
 
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
@@ -48,7 +45,6 @@ async function streamChat({
     const { done, value } = await reader.read();
     if (done) break;
     buf += decoder.decode(value, { stream: true });
-
     let idx: number;
     while ((idx = buf.indexOf('\n')) !== -1) {
       let line = buf.slice(0, idx);
@@ -69,7 +65,6 @@ async function streamChat({
     }
   }
 
-  // flush
   if (buf.trim()) {
     for (let raw of buf.split('\n')) {
       if (!raw) continue;
@@ -84,9 +79,47 @@ async function streamChat({
       } catch {}
     }
   }
-
   onDone();
 }
+
+const TTSButton = ({ text }: { text: string }) => {
+  const [speaking, setSpeaking] = useState(false);
+
+  const speak = useCallback(() => {
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+    setSpeaking(true);
+  }, [text, speaking]);
+
+  useEffect(() => {
+    return () => { window.speechSynthesis.cancel(); };
+  }, []);
+
+  return (
+    <button
+      onClick={speak}
+      className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+        speaking
+          ? 'bg-destructive/20 hover:bg-destructive/30'
+          : 'bg-primary/10 hover:bg-primary/20'
+      }`}
+      title={speaking ? 'Stop' : 'Listen'}
+    >
+      {speaking ? (
+        <Square className="w-3 h-3 text-destructive" />
+      ) : (
+        <Volume2 className="w-3.5 h-3.5 text-primary" />
+      )}
+    </button>
+  );
+};
 
 const ChatSection = () => {
   const { t } = useLanguage();
@@ -97,16 +130,13 @@ const ChatSection = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
   const send = async () => {
     const text = input.trim();
     if (!text || isLoading) return;
     setInput('');
-
     const userMsg: Message = { role: 'user', content: text };
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
@@ -139,10 +169,6 @@ const ChatSection = () => {
     }
   };
 
-  const clearChat = () => {
-    setMessages([]);
-  };
-
   return (
     <section id="chat" className="section-padding bg-muted">
       <div className="container-custom">
@@ -156,9 +182,7 @@ const ChatSection = () => {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground mb-4">
             {t('chat.title')} <span className="gradient-text">{t('chat.titleHighlight')}</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t('chat.subtitle')}
-          </p>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{t('chat.subtitle')}</p>
         </motion.div>
 
         <motion.div
@@ -173,18 +197,14 @@ const ChatSection = () => {
             <div className="gradient-bg px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Bot className="w-6 h-6 text-primary-foreground" />
-                <h3 className="text-lg font-semibold text-primary-foreground">
-                  {t('chat.assistantName')}
-                </h3>
+                <h3 className="text-lg font-semibold text-primary-foreground">{t('chat.assistantName')}</h3>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={clearChat}
-                  className="w-10 h-10 rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 flex items-center justify-center transition-all hover:scale-110"
-                >
-                  <Trash2 className="w-4 h-4 text-primary-foreground" />
-                </button>
-              </div>
+              <button
+                onClick={() => { setMessages([]); window.speechSynthesis.cancel(); }}
+                className="w-10 h-10 rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 flex items-center justify-center transition-all hover:scale-110"
+              >
+                <Trash2 className="w-4 h-4 text-primary-foreground" />
+              </button>
             </div>
 
             {/* Messages */}
@@ -197,9 +217,10 @@ const ChatSection = () => {
                   <div className="flex-1">
                     <div className="bg-muted rounded-2xl rounded-tl-md p-4 max-w-lg">
                       <span className="text-sm font-semibold text-foreground">{t('chat.titleHighlight')}</span>
-                      <p className="text-sm text-foreground leading-relaxed mt-2">
-                        {t('chat.greeting')}
-                      </p>
+                      <p className="text-sm text-foreground leading-relaxed mt-2">{t('chat.greeting')}</p>
+                      <div className="mt-3">
+                        <TTSButton text={t('chat.greeting')} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -214,9 +235,10 @@ const ChatSection = () => {
                     <div className="flex-1">
                       <div className="bg-muted rounded-2xl rounded-tl-md p-4 max-w-lg">
                         <span className="text-sm font-semibold text-foreground">{t('chat.titleHighlight')}</span>
-                        <p className="text-sm text-foreground leading-relaxed mt-2 whitespace-pre-wrap">
-                          {msg.content}
-                        </p>
+                        <p className="text-sm text-foreground leading-relaxed mt-2 whitespace-pre-wrap">{msg.content}</p>
+                        <div className="flex gap-2 mt-3">
+                          <TTSButton text={msg.content} />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -225,9 +247,7 @@ const ChatSection = () => {
                     <div className="flex-1 flex justify-end">
                       <div className="gradient-bg rounded-2xl rounded-tr-md p-4 max-w-lg">
                         <span className="text-sm font-semibold text-primary-foreground">{t('chat.you')}</span>
-                        <p className="text-sm text-primary-foreground leading-relaxed mt-2">
-                          {msg.content}
-                        </p>
+                        <p className="text-sm text-primary-foreground leading-relaxed mt-2">{msg.content}</p>
                       </div>
                     </div>
                   </div>
@@ -253,10 +273,7 @@ const ChatSection = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      send();
-                    }
+                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
                   }}
                   placeholder={t('chat.placeholder')}
                   rows={1}
