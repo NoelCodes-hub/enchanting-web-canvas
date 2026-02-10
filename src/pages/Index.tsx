@@ -5,6 +5,7 @@ import KnowledgeBaseSection from '@/components/KnowledgeBaseSection';
 import ChatSection from '@/components/ChatSection';
 import ToolsSection from '@/components/ToolsSection';
 import Footer from '@/components/Footer';
+import BackToTop from '@/components/BackToTop';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const Index = () => {
@@ -20,6 +21,7 @@ const Index = () => {
           <ToolsSection />
         </main>
         <Footer />
+        <BackToTop />
       </div>
     </LanguageProvider>
   );
