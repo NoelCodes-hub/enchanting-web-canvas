@@ -55,14 +55,15 @@ const HeroSection = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Button 
-              size="xl" 
-              className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg font-bold"
-              onClick={() => document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              {t('hero.cta1')}
-              <ArrowRight className="w-5 h-5" />
-            </Button>
+            <a href="#chat">
+              <Button 
+                size="xl" 
+                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg font-bold"
+              >
+                {t('hero.cta1')}
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </a>
             <Button 
               size="xl" 
               variant="heroOutline"
