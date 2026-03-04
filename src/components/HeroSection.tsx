@@ -58,6 +58,7 @@ const HeroSection = () => {
             <Button 
               size="xl" 
               className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg font-bold"
+              onClick={() => document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })}
             >
               {t('hero.cta1')}
               <ArrowRight className="w-5 h-5" />
