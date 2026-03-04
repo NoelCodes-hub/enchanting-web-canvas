@@ -20,16 +20,19 @@ const ToolsSection = () => {
       icon: BarChart3,
       title: t('tools.metrics.title'),
       description: t('tools.metrics.desc'),
+      link: '/metrics',
     },
     {
       icon: FileText,
       title: t('tools.templates.title'),
       description: t('tools.templates.desc'),
+      link: '/templates',
     },
     {
       icon: CalendarDays,
       title: t('tools.training.title'),
       description: t('tools.training.desc'),
+      link: '/training',
     },
   ];
 
