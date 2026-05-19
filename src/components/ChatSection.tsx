@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Bot, Trash2, Send, Loader2, Volume2, Square } from 'lucide-react';
+import { Bot, Trash2, Send, Loader2, Volume2, Square, Mic, MicOff } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
@@ -127,7 +127,42 @@ const ChatSection = () => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const toggleListening = useCallback(() => {
+    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      toast({ title: 'Not supported', description: 'Speech recognition is not supported in this browser.', variant: 'destructive' });
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+    const recognition = new SR();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInput((prev) => (prev ? prev + ' ' : '') + transcript);
+    };
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = (e: any) => {
+      setIsListening(false);
+      if (e.error !== 'no-speech' && e.error !== 'aborted') {
+        toast({ title: 'Mic error', description: e.error, variant: 'destructive' });
+      }
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  }, [isListening, toast]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -279,6 +314,16 @@ const ChatSection = () => {
                   rows={1}
                   className="flex-1 px-5 py-3 rounded-full border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none text-sm transition-all"
                 />
+                <button
+                  onClick={toggleListening}
+                  type="button"
+                  title={isListening ? 'Stop listening' : 'Speak'}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 ${
+                    isListening ? 'bg-destructive text-destructive-foreground animate-pulse' : 'bg-muted hover:bg-muted/80 text-foreground'
+                  }`}
+                >
+                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
                 <button
                   onClick={send}
                   disabled={isLoading || !input.trim()}
