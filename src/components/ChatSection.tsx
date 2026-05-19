@@ -315,6 +315,16 @@ const ChatSection = () => {
                   className="flex-1 px-5 py-3 rounded-full border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none text-sm transition-all"
                 />
                 <button
+                  onClick={toggleListening}
+                  type="button"
+                  title={isListening ? 'Stop listening' : 'Speak'}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-105 ${
+                    isListening ? 'bg-destructive text-destructive-foreground animate-pulse' : 'bg-muted hover:bg-muted/80 text-foreground'
+                  }`}
+                >
+                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
+                <button
                   onClick={send}
                   disabled={isLoading || !input.trim()}
                   className="w-12 h-12 rounded-full gradient-bg flex items-center justify-center shadow-glow hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100"
