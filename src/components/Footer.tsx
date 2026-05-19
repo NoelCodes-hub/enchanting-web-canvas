@@ -99,15 +99,15 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-background/70">
                 <Mail className="w-4 h-4" />
-                <span>hello@plusme.ai</span>
+                <span>mayibongwed94@gmail.com</span>
               </li>
               <li className="flex items-center gap-3 text-background/70">
                 <Phone className="w-4 h-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>+263 77450 1486</span>
               </li>
               <li className="flex items-start gap-3 text-background/70">
                 <MapPin className="w-4 h-4 mt-0.5" />
-                <span>123 Inclusion Street,<br />Innovation City, IC 12345</span>
+                <span>NUST Campus,<br />Bulawayo, Zimbabwe</span>
               </li>
             </ul>
           </div>
