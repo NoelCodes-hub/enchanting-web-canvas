@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Bot, Trash2, Send, Loader2, Volume2, Square } from 'lucide-react';
+import { Bot, Trash2, Send, Loader2, Volume2, Square, Mic, MicOff } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
