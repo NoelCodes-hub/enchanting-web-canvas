@@ -264,17 +264,68 @@ const KnowledgeBaseSection = () => {
                 <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                   {article.description}
                 </p>
-                <a
-                  href="#"
-                  className="inline-flex items-center gap-2 text-primary font-semibold text-sm hover:gap-3 transition-all"
+                <button
+                  type="button"
+                  onClick={() => setSelectedArticle(article.id)}
+                  className="inline-flex items-center gap-2 text-primary font-semibold text-sm hover:gap-3 transition-all cursor-pointer"
                 >
                   {t('knowledge.readMore')}
                   <ArrowRight className="w-4 h-4" />
-                </a>
+                </button>
               </div>
             </motion.article>
           ))}
         </div>
+
+        {/* Article Detail Dialog */}
+        <Dialog open={selectedArticle !== null} onOpenChange={(open) => !open && setSelectedArticle(null)}>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+            {selectedArticle !== null && (() => {
+              const article = articles.find((a) => a.id === selectedArticle)!;
+              const details = articleDetails[selectedArticle];
+              const Icon = article.icon;
+              return (
+                <>
+                  <DialogHeader>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-12 h-12 rounded-2xl gradient-bg flex items-center justify-center">
+                        <Icon className="w-6 h-6 text-primary-foreground" />
+                      </div>
+                      <DialogTitle className="text-2xl font-display">{article.title}</DialogTitle>
+                    </div>
+                    <DialogDescription className="text-base leading-relaxed pt-2">
+                      {details.overview}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="mt-4 space-y-6">
+                    <div>
+                      <h4 className="font-bold text-foreground mb-2">Recommended Accommodations</h4>
+                      <ul className="space-y-2">
+                        {details.accommodations.map((item, i) => (
+                          <li key={i} className="flex gap-2 text-sm text-muted-foreground">
+                            <span className="text-primary font-bold">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-foreground mb-2">Practical Tips</h4>
+                      <ul className="space-y-2">
+                        {details.tips.map((item, i) => (
+                          <li key={i} className="flex gap-2 text-sm text-muted-foreground">
+                            <span className="text-primary font-bold">✓</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
