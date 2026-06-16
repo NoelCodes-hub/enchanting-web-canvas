@@ -64,13 +64,15 @@ const HeroSection = () => {
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </a>
-            <Button 
-              size="xl" 
-              variant="heroOutline"
-            >
-              <BookOpen className="w-5 h-5" />
-              {t('hero.cta2')}
-            </Button>
+            <a href="#knowledge">
+              <Button 
+                size="xl" 
+                variant="heroOutline"
+              >
+                <BookOpen className="w-5 h-5" />
+                {t('hero.cta2')}
+              </Button>
+            </a>
           </motion.div>
         </div>
 
