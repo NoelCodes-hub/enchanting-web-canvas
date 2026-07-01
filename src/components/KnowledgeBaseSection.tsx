@@ -2,11 +2,119 @@ import { motion } from 'framer-motion';
 import { Search, Eye, Ear, Accessibility, Brain, Sparkles, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 const KnowledgeBaseSection = () => {
   const { t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedArticle, setSelectedArticle] = useState<number | null>(null);
+
+  const articleDetails: Record<number, { overview: string; accommodations: string[]; tips: string[] }> = {
+    1: {
+      overview: 'Visual impairments range from low vision to total blindness. With the right assistive technology and workplace adjustments, visually impaired employees thrive in nearly every role.',
+      accommodations: [
+        'Screen reader software (NVDA, JAWS, VoiceOver)',
+        'Screen magnification tools (ZoomText, built-in OS magnifiers)',
+        'High-contrast displays and adjustable font sizes',
+        'Braille displays and embossers',
+        'Accessible document formats (tagged PDFs, semantic HTML)',
+      ],
+      tips: [
+        'Ensure all digital content meets WCAG 2.1 AA standards',
+        'Provide orientation and mobility training for the office',
+        'Use descriptive alt text on every image and chart',
+        'Keep walkways clear and consistently arranged',
+      ],
+    },
+    2: {
+      overview: 'Deaf and hard-of-hearing employees benefit most from clear communication channels and visual equivalents of audio information.',
+      accommodations: [
+        'Qualified sign language interpreters (ASL, BSL, local variants)',
+        'Real-time captioning (CART) for meetings and events',
+        'Video relay services and captioned phones',
+        'Visual fire alarms and notification systems',
+        'Noise-reducing workstations and FM/loop systems',
+      ],
+      tips: [
+        'Always face the person when speaking',
+        'Caption every internal and external video',
+        'Share agendas and notes in writing before meetings',
+        'Use chat tools alongside voice calls',
+      ],
+    },
+    3: {
+      overview: 'Mobility disabilities cover a wide range of conditions affecting movement. Physical and procedural adjustments unlock full participation.',
+      accommodations: [
+        'Step-free access, ramps, and automatic doors',
+        'Height-adjustable desks and ergonomic seating',
+        'Accessible restrooms within reasonable distance',
+        'Reserved accessible parking close to entrances',
+        'Remote and hybrid work options',
+      ],
+      tips: [
+        'Audit your office annually against accessibility standards',
+        'Keep aisles at least 36 inches wide',
+        'Offer flexible scheduling for medical appointments',
+        'Provide voice-control or alternative input devices',
+      ],
+    },
+    4: {
+      overview: 'Cognitive disabilities affect memory, attention, problem-solving, or processing speed. Structure and clarity make a major difference.',
+      accommodations: [
+        'Written instructions and visual checklists',
+        'Task-management apps and reminder tools',
+        'Quiet workspaces with minimal interruptions',
+        'Extended deadlines or modified workloads where reasonable',
+        'Job coaching and mentoring support',
+      ],
+      tips: [
+        'Break large projects into clear, sequential steps',
+        'Confirm understanding by asking the employee to summarize',
+        'Use plain language and avoid idioms',
+        'Schedule regular, predictable check-ins',
+      ],
+    },
+    5: {
+      overview: 'Neurodivergent employees — including autistic, ADHD, and dyslexic people — bring unique strengths when environments respect different ways of thinking.',
+      accommodations: [
+        'Sensory-friendly lighting and noise-cancelling headphones',
+        'Flexible communication (written vs. verbal)',
+        'Predictable routines with advance notice of changes',
+        'Quiet rooms for sensory regulation',
+        'Clear, literal task descriptions and expectations',
+      ],
+      tips: [
+        'Avoid surprise meetings — share agendas ahead of time',
+        'Allow stimming, movement, and fidget tools',
+        'Focus on outcomes, not on social conformity',
+        'Offer multiple ways to contribute (writing, recording, presenting)',
+      ],
+    },
+    6: {
+      overview: 'Universal Design creates environments and products usable by everyone, regardless of ability — reducing the need for individual accommodations.',
+      accommodations: [
+        'Step-free entrances used by all employees',
+        'Captions on every video benefit everyone in noisy environments',
+        'Adjustable furniture suits every body type',
+        'Plain-language documents help all readers',
+        'Multiple input methods (keyboard, mouse, voice, touch)',
+      ],
+      tips: [
+        'Design for the edges and the middle benefits',
+        'Involve disabled employees in the design process',
+        'Test products with diverse users early and often',
+        'Treat accessibility as a quality standard, not a checklist',
+      ],
+    },
+  };
+
 
   const categories = [
     { id: 'all', label: t('knowledge.all') },
@@ -156,17 +264,68 @@ const KnowledgeBaseSection = () => {
                 <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                   {article.description}
                 </p>
-                <a
-                  href="#"
-                  className="inline-flex items-center gap-2 text-primary font-semibold text-sm hover:gap-3 transition-all"
+                <button
+                  type="button"
+                  onClick={() => setSelectedArticle(article.id)}
+                  className="inline-flex items-center gap-2 text-primary font-semibold text-sm hover:gap-3 transition-all cursor-pointer"
                 >
                   {t('knowledge.readMore')}
                   <ArrowRight className="w-4 h-4" />
-                </a>
+                </button>
               </div>
             </motion.article>
           ))}
         </div>
+
+        {/* Article Detail Dialog */}
+        <Dialog open={selectedArticle !== null} onOpenChange={(open) => !open && setSelectedArticle(null)}>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+            {selectedArticle !== null && (() => {
+              const article = articles.find((a) => a.id === selectedArticle)!;
+              const details = articleDetails[selectedArticle];
+              const Icon = article.icon;
+              return (
+                <>
+                  <DialogHeader>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-12 h-12 rounded-2xl gradient-bg flex items-center justify-center">
+                        <Icon className="w-6 h-6 text-primary-foreground" />
+                      </div>
+                      <DialogTitle className="text-2xl font-display">{article.title}</DialogTitle>
+                    </div>
+                    <DialogDescription className="text-base leading-relaxed pt-2">
+                      {details.overview}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="mt-4 space-y-6">
+                    <div>
+                      <h4 className="font-bold text-foreground mb-2">Recommended Accommodations</h4>
+                      <ul className="space-y-2">
+                        {details.accommodations.map((item, i) => (
+                          <li key={i} className="flex gap-2 text-sm text-muted-foreground">
+                            <span className="text-primary font-bold">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-foreground mb-2">Practical Tips</h4>
+                      <ul className="space-y-2">
+                        {details.tips.map((item, i) => (
+                          <li key={i} className="flex gap-2 text-sm text-muted-foreground">
+                            <span className="text-primary font-bold">✓</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
