@@ -13,23 +13,32 @@ serve(async (req) => {
 
   try {
     const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const XAI_API_KEY = Deno.env.get("XAI_API_KEY");
 
-    const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            {
-              role: "system",
-              content: `You are PLUSME, an AI workplace inclusion assistant. You help recommend suitable tasks and accommodations for people with disabilities in various job roles. You have expertise in:
+    if (!OPENAI_API_KEY && !XAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY or XAI_API_KEY is not configured");
+    }
+
+    const useOpenAI = Boolean(OPENAI_API_KEY);
+    const apiUrl = useOpenAI
+      ? "https://api.openai.com/v1/chat/completions"
+      : "https://api.x.ai/v1/chat/completions";
+    const apiKey = useOpenAI ? OPENAI_API_KEY : XAI_API_KEY;
+    const model = useOpenAI ? "gpt-4o-mini" : "grok-beta";
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: "system",
+            content: `You are PLUSME, an AI workplace inclusion assistant. You help recommend suitable tasks and accommodations for people with disabilities in various job roles. You have expertise in:
 - Visual impairment accommodations (screen readers, magnification, workplace adaptations)
 - Hearing accessibility (sign language, captioning, visual alerts)
 - Mobility support (wheelchair access, ergonomic workstations, flexible arrangements)
@@ -37,13 +46,12 @@ serve(async (req) => {
 - Neurodiversity (autism-friendly environments, ADHD accommodations, sensory considerations)
 
 Be empathetic, practical, and specific in your recommendations. Keep responses concise but helpful.`,
-            },
-            ...messages,
-          ],
-          stream: true,
-        }),
-      }
-    );
+          },
+          ...messages,
+        ],
+        stream: true,
+      }),
+    });
 
     if (!response.ok) {
       if (response.status === 429) {
