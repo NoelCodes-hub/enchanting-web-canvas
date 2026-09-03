@@ -1,7 +1,8 @@
-import { motion } from 'framer-motion';
-import { Search, Eye, Ear, Accessibility, Brain, Sparkles, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Eye, Ear, Accessibility, Brain, Sparkles, ArrowRight, Loader2, Bot, Square } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -10,11 +11,99 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
+const AI_SEARCH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+
 const KnowledgeBaseSection = () => {
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArticle, setSelectedArticle] = useState<number | null>(null);
+  const [aiAnswer, setAiAnswer] = useState('');
+  const [aiQuestion, setAiQuestion] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const aiAbortRef = useRef<AbortController | null>(null);
+
+  const stopAiSearch = () => {
+    aiAbortRef.current?.abort();
+    aiAbortRef.current = null;
+    setAiLoading(false);
+  };
+
+  const askAi = async () => {
+    const question = searchQuery.trim();
+    if (!question || aiLoading) return;
+
+    const controller = new AbortController();
+    aiAbortRef.current = controller;
+    setAiQuestion(question);
+    setAiAnswer('');
+    setAiLoading(true);
+
+    try {
+      const resp = await fetch(AI_SEARCH_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: `Knowledge base question: ${question}. Answer helpfully and concisely.`,
+            },
+          ],
+        }),
+        signal: controller.signal,
+      });
+
+      if (!resp.ok || !resp.body) {
+        const data = await resp.json().catch(() => ({}));
+        throw new Error(data.error || 'AI search failed. Please try again.');
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+          const line = buffer.slice(0, newlineIndex).trim();
+          buffer = buffer.slice(newlineIndex + 1);
+          if (!line.startsWith('data:')) continue;
+          const jsonStr = line.slice(5).trim();
+          if (jsonStr === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) setAiAnswer((prev) => prev + content);
+          } catch {
+            // partial JSON chunk — wait for more data
+          }
+        }
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        // user stopped — keep partial answer
+      } else {
+        toast({
+          title: 'AI search error',
+          description: err instanceof Error ? err.message : 'Something went wrong.',
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      setAiLoading(false);
+      aiAbortRef.current = null;
+    }
+  };
+
 
   const articleDetails: Record<number, { overview: string; accommodations: string[]; tips: string[] }> = {
     1: {
