@@ -10,6 +10,7 @@ import Assessment from "./pages/Assessment";
 import InclusionMetrics from "./pages/InclusionMetrics";
 import PolicyTemplates from "./pages/PolicyTemplates";
 import TrainingScheduler from "./pages/TrainingScheduler";
+import OAuthConsent from "./pages/OAuthConsent";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/metrics" element={<InclusionMetrics />} />
           <Route path="/templates" element={<PolicyTemplates />} />

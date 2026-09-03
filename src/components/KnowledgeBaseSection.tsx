@@ -1,7 +1,8 @@
-import { motion } from 'framer-motion';
-import { Search, Eye, Ear, Accessibility, Brain, Sparkles, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Eye, Ear, Accessibility, Brain, Sparkles, ArrowRight, Loader2, Bot, Square } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -10,11 +11,99 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
+const AI_SEARCH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+
 const KnowledgeBaseSection = () => {
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArticle, setSelectedArticle] = useState<number | null>(null);
+  const [aiAnswer, setAiAnswer] = useState('');
+  const [aiQuestion, setAiQuestion] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const aiAbortRef = useRef<AbortController | null>(null);
+
+  const stopAiSearch = () => {
+    aiAbortRef.current?.abort();
+    aiAbortRef.current = null;
+    setAiLoading(false);
+  };
+
+  const askAi = async () => {
+    const question = searchQuery.trim();
+    if (!question || aiLoading) return;
+
+    const controller = new AbortController();
+    aiAbortRef.current = controller;
+    setAiQuestion(question);
+    setAiAnswer('');
+    setAiLoading(true);
+
+    try {
+      const resp = await fetch(AI_SEARCH_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: `Knowledge base question: ${question}. Answer helpfully and concisely.`,
+            },
+          ],
+        }),
+        signal: controller.signal,
+      });
+
+      if (!resp.ok || !resp.body) {
+        const data = await resp.json().catch(() => ({}));
+        throw new Error(data.error || 'AI search failed. Please try again.');
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+          const line = buffer.slice(0, newlineIndex).trim();
+          buffer = buffer.slice(newlineIndex + 1);
+          if (!line.startsWith('data:')) continue;
+          const jsonStr = line.slice(5).trim();
+          if (jsonStr === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) setAiAnswer((prev) => prev + content);
+          } catch {
+            // partial JSON chunk — wait for more data
+          }
+        }
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        // user stopped — keep partial answer
+      } else {
+        toast({
+          title: 'AI search error',
+          description: err instanceof Error ? err.message : 'Something went wrong.',
+          variant: 'destructive',
+        });
+      }
+    } finally {
+      setAiLoading(false);
+      aiAbortRef.current = null;
+    }
+  };
+
 
   const articleDetails: Record<number, { overview: string; accommodations: string[]; tips: string[] }> = {
     1: {
@@ -211,9 +300,55 @@ const KnowledgeBaseSection = () => {
               placeholder={t('knowledge.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-14 pr-6 py-4 rounded-full border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') askAi();
+              }}
+              className="w-full pl-14 pr-32 py-4 rounded-full border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
             />
+            <button
+              type="button"
+              onClick={aiLoading ? stopAiSearch : askAi}
+              disabled={!aiLoading && !searchQuery.trim()}
+              className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 px-4 py-2 rounded-full gradient-bg text-primary-foreground text-sm font-semibold shadow-glow hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {aiLoading ? (
+                <>
+                  <Square className="w-3.5 h-3.5" />
+                  Stop
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Ask AI
+                </>
+              )}
+            </button>
           </div>
+
+          {/* AI Search Answer */}
+          <AnimatePresence>
+            {(aiLoading || aiAnswer) && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mt-4 bg-background rounded-2xl border border-primary/20 shadow-card p-5 text-left"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-7 h-7 rounded-lg gradient-bg flex items-center justify-center">
+                    <Bot className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                  <span className="text-sm font-bold text-foreground">AI Search</span>
+                  {aiLoading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+                </div>
+                <p className="text-xs text-muted-foreground mb-2 italic">"{aiQuestion}"</p>
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                  {aiAnswer}
+                  {aiLoading && <span className="inline-block w-2 h-4 ml-1 bg-primary animate-pulse" />}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* Category Filters */}
