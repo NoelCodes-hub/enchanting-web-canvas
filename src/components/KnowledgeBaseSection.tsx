@@ -300,9 +300,55 @@ const KnowledgeBaseSection = () => {
               placeholder={t('knowledge.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-14 pr-6 py-4 rounded-full border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') askAi();
+              }}
+              className="w-full pl-14 pr-32 py-4 rounded-full border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
             />
+            <button
+              type="button"
+              onClick={aiLoading ? stopAiSearch : askAi}
+              disabled={!aiLoading && !searchQuery.trim()}
+              className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 px-4 py-2 rounded-full gradient-bg text-primary-foreground text-sm font-semibold shadow-glow hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {aiLoading ? (
+                <>
+                  <Square className="w-3.5 h-3.5" />
+                  Stop
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Ask AI
+                </>
+              )}
+            </button>
           </div>
+
+          {/* AI Search Answer */}
+          <AnimatePresence>
+            {(aiLoading || aiAnswer) && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mt-4 bg-background rounded-2xl border border-primary/20 shadow-card p-5 text-left"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-7 h-7 rounded-lg gradient-bg flex items-center justify-center">
+                    <Bot className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                  <span className="text-sm font-bold text-foreground">AI Search</span>
+                  {aiLoading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+                </div>
+                <p className="text-xs text-muted-foreground mb-2 italic">"{aiQuestion}"</p>
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                  {aiAnswer}
+                  {aiLoading && <span className="inline-block w-2 h-4 ml-1 bg-primary animate-pulse" />}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* Category Filters */}
