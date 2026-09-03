@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "sdk_version": "1.0.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://duezeqilajlyekhdzodh.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "plusme",
+      "version": "0.1.0",
+      "title": "Plusme"
+    },
+    "tools": [
+      {
+        "name": "list_knowledge_topics",
+        "title": "List knowledge topics",
+        "description": "List the disability and inclusion topics in the PLUSME knowledge base (visual, hearing, mobility, cognitive, neurodiversity, universal design).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_accommodation_guide",
+        "title": "Get accommodation guide",
+        "description": "Get the PLUSME accommodation guide for one disability topic: overview, recommended accommodations, and practical workplace tips. Call list_knowledge_topics first to see the valid topic ids.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "topic": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Topic id: visual, hearing, mobility, cognitive, neurodiversity, or universal."
+            }
+          },
+          "required": [
+            "topic"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_my_profile",
+        "title": "Get my profile",
+        "description": "Read the signed-in PLUSME user's profile (display name and avatar).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_my_profile",
+        "title": "Update my profile",
+        "description": "Update the signed-in PLUSME user's display name and/or avatar URL.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "display_name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "New display name."
+            },
+            "avatar_url": {
+              "type": "string",
+              "format": "uri",
+              "description": "New avatar image URL."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
